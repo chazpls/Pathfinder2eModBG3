@@ -824,7 +824,8 @@
         <field name="UUID" type="IdTableFieldDefinition" value="836355e8-359f-47d2-be05-9cbb73ca3924" />
         <field name="Name" type="NameTableFieldDefinition" value="CreateDiversion" />
         <field name="SpellContainerID" type="StringTableFieldDefinition" value="Target_SkillActions" />
-        <field name="SpellProperties" type="StringTableFieldDefinition" value="GROUND:Summon(f08cb6ae-42b8-404f-a4c0-f57bd0347267,1);IF(Combat(context.Source)):ApplyStatus(SELF,HIDDEN,100,-1);IF(Combat(context.Source)):ApplyStatus(SELF,DIVERSION_CHECK_RESULT,100,1d20);AOE:IF(not Tagged('CROWDSYS_NPC', context.Target) and Combat(context.Source) and Combat(context.Target)):ApplyStatus(HIDDEN_FROM_TECHNICAL,100,0);" />
+        <field name="SpellProperties" type="StringTableFieldDefinition" value="GROUND:Summon(f08cb6ae-42b8-404f-a4c0-f57bd0347267,1);IF(Combat(context.Source)):ApplyStatus(SELF,DIVERSION_CHECK_RESULT,100,1d20);AOE:IF(not Tagged('CROWDSYS_NPC', context.Target) and Combat(context.Source) and Combat(context.Target)):ApplyStatus(HIDDEN_FROM_TECHNICAL,100,0);" />
+        <field name="TargetRadius" type="StringTableFieldDefinition" value="18" />
         <field name="AreaRadius" type="IntegerTableFieldDefinition" value="50" />
         <field name="RequirementConditions" type="StringTableFieldDefinition" value="not HasStatus('HIDDEN',context.Source);" />
         <field name="RequirementEvents" type="EnumerationListTableFieldDefinition" value="OnStatusApplied;OnStatusRemoved" enumeration_type_name="StatusEvent" version="1" />

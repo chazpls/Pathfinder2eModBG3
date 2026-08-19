@@ -658,7 +658,10 @@ THEN
 DB_DiversionLocation(_Helper);
 
 // Create a Diversion always checks against every enemy, and does
-// not care about line of sight.
+// not care about line of sight. The distraction helper is only used
+// to turn enemies; Off-Guard/Hidden must still apply if it fails
+// to spawn. Apply the stale penalty in this same THEN so it cannot
+// race the perception check on this attempt.
 IF
 TimerFinished("DiversionCheckTimer")
 AND
@@ -671,33 +674,30 @@ AND
 GetStatusTurns(_Cause, "DIVERSION_CHECK_RESULT", (INTEGER)_Roll)
 AND
 IntegerSum(_Roll, _ModifierSkill, (INTEGER)_TotalRoll)
-AND
-DB_DiversionLocation((GUIDSTRING)_Helper)
 THEN
 PROC_ApplyHiddenDiversion(_Character, _Cause, _TotalRoll, _Roll);
+NOT DB_HideCheckSchedule(_Character, _Cause);
+ApplyStatus(_Cause, "DIVERSION_STALE", 60.0, 1, _Cause);
 
-// Cleanup and apply the stale status to debuff future attempts.
 IF
 TimerFinished("DiversionCheckTimer")
 AND
-DB_HideCheckSchedule((GUIDSTRING)_Character, (GUIDSTRING)_Cause)
-AND
 DB_DiversionLocation((GUIDSTRING)_Helper)
 THEN
-NOT DB_HideCheckSchedule(_Character, _Cause);
-ApplyStatus(_Cause, "DIVERSION_STALE", 60.0, 1, _Character);
 NOT DB_DiversionLocation(_Helper);
 
 // A check of the roll against perception DC.
 PROC
 PROC_ApplyHiddenDiversion((GUIDSTRING)_Character, (GUIDSTRING)_Cause, (INTEGER)_Roll, (INTEGER)_Raw)
 AND
-HasActiveStatus(_Character, "DIVERSION_STALE", 0)
+HasActiveStatus(_Cause, "DIVERSION_STALE", 0)
 AND
 CalculatePassiveSkill(_Character, "Perception", (INTEGER)_PassivePerception)
 AND
 _Roll >= _PassivePerception
 THEN
+ApplyStatus(_Cause, "DIVERSION_ACTIVE", 6.0, 1, _Cause);
+ApplyStatus(_Cause, "HIDDEN", -1.0, 0, _Cause);
 ApplyStatus(_Character, "HIDDEN_FROM", -1.0, 0, _Cause);
 PROC_TurnToDiversion(_Character);
 
@@ -707,6 +707,8 @@ PROC_ApplyHiddenDiversion((GUIDSTRING)_Character, (GUIDSTRING)_Cause, (INTEGER)_
 AND
 _Raw == 20
 THEN
+ApplyStatus(_Cause, "DIVERSION_ACTIVE", 6.0, 1, _Cause);
+ApplyStatus(_Cause, "HIDDEN", -1.0, 0, _Cause);
 ApplyStatus(_Character, "HIDDEN_FROM", -1.0, 0, _Cause);
 PROC_TurnToDiversion(_Character);
 
@@ -725,6 +727,8 @@ IntegerSum(_PassivePerception, 4, (INTEGER)_PerceptionDC)
 AND
 _Roll >= _PerceptionDC
 THEN
+ApplyStatus(_Cause, "DIVERSION_ACTIVE", 6.0, 1, _Cause);
+ApplyStatus(_Cause, "HIDDEN", -1.0, 0, _Cause);
 ApplyStatus(_Character, "HIDDEN_FROM", -1.0, 0, _Cause);
 PROC_TurnToDiversion(_Character);
 
