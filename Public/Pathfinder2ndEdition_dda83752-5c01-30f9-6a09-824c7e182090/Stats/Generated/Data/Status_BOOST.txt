@@ -2642,7 +2642,7 @@ data "StatusType" "BOOST"
 using "HIDDEN_FROM_TECHNICAL"
 data "StackId" "DIVERSION_ACTIVE"
 data "StackPriority" "1"
-data "StackType" "Overwrite"
+data "StackType" "Ignore"
 data "TickType" "EndTurn"
 data "StatusPropertyFlags" "DisableOverhead;DisableCombatlog;DisablePortraitIndicator"
 

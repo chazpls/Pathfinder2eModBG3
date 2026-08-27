@@ -649,6 +649,7 @@ AND
 TimerExists("DiversionCheckTimer", 0)
 THEN
 TimerLaunch("DiversionCheckTimer", 30);
+DB_DiversionCaster(_Cause);
 
 // Create a distraction spawns an invisible helper that
 // allows us to make humanoid enemies turn towards it. 
@@ -660,8 +661,7 @@ DB_DiversionLocation(_Helper);
 // Create a Diversion always checks against every enemy, and does
 // not care about line of sight. The distraction helper is only used
 // to turn enemies; Off-Guard/Hidden must still apply if it fails
-// to spawn. Apply the stale penalty in this same THEN so it cannot
-// race the perception check on this attempt.
+// to spawn.
 IF
 TimerFinished("DiversionCheckTimer")
 AND
@@ -677,7 +677,6 @@ IntegerSum(_Roll, _ModifierSkill, (INTEGER)_TotalRoll)
 THEN
 PROC_ApplyHiddenDiversion(_Character, _Cause, _TotalRoll, _Roll);
 NOT DB_HideCheckSchedule(_Character, _Cause);
-ApplyStatus(_Cause, "DIVERSION_STALE", 60.0, 1, _Cause);
 
 IF
 TimerFinished("DiversionCheckTimer")
@@ -685,6 +684,24 @@ AND
 DB_DiversionLocation((GUIDSTRING)_Helper)
 THEN
 NOT DB_DiversionLocation(_Helper);
+
+// Stale is a penalty on later attempts. Apply it after every
+// enemy on this attempt has been checked, so the +4 DC cannot
+// apply to this same diversion.
+IF
+TimerFinished("DiversionCheckTimer")
+AND
+DB_DiversionCaster((GUIDSTRING)_Cause)
+THEN
+TimerLaunch("DiversionStaleTimer", 50);
+
+IF
+TimerFinished("DiversionStaleTimer")
+AND
+DB_DiversionCaster((GUIDSTRING)_Cause)
+THEN
+ApplyStatus(_Cause, "DIVERSION_STALE", 60.0, 1, _Cause);
+NOT DB_DiversionCaster(_Cause);
 
 // A check of the roll against perception DC.
 PROC
@@ -696,9 +713,7 @@ CalculatePassiveSkill(_Character, "Perception", (INTEGER)_PassivePerception)
 AND
 _Roll >= _PassivePerception
 THEN
-ApplyStatus(_Cause, "DIVERSION_ACTIVE", 6.0, 1, _Cause);
-ApplyStatus(_Cause, "HIDDEN", -1.0, 0, _Cause);
-ApplyStatus(_Character, "HIDDEN_FROM", -1.0, 0, _Cause);
+PROC_ApplyDiversionHiddenFrom(_Character, _Cause);
 PROC_TurnToDiversion(_Character);
 
 // Crits always succeed
@@ -707,9 +722,7 @@ PROC_ApplyHiddenDiversion((GUIDSTRING)_Character, (GUIDSTRING)_Cause, (INTEGER)_
 AND
 _Raw == 20
 THEN
-ApplyStatus(_Cause, "DIVERSION_ACTIVE", 6.0, 1, _Cause);
-ApplyStatus(_Cause, "HIDDEN", -1.0, 0, _Cause);
-ApplyStatus(_Character, "HIDDEN_FROM", -1.0, 0, _Cause);
+PROC_ApplyDiversionHiddenFrom(_Character, _Cause);
 PROC_TurnToDiversion(_Character);
 
 // Characters that have recently used Create a Diversion are
@@ -727,10 +740,27 @@ IntegerSum(_PassivePerception, 4, (INTEGER)_PerceptionDC)
 AND
 _Roll >= _PerceptionDC
 THEN
-ApplyStatus(_Cause, "DIVERSION_ACTIVE", 6.0, 1, _Cause);
-ApplyStatus(_Cause, "HIDDEN", -1.0, 0, _Cause);
-ApplyStatus(_Character, "HIDDEN_FROM", -1.0, 0, _Cause);
+PROC_ApplyDiversionHiddenFrom(_Character, _Cause);
 PROC_TurnToDiversion(_Character);
+
+// Apply DIVERSION_ACTIVE only once so Overwrite does not fire
+// StatusRemoved and strip HIDDEN_FROM from earlier enemies.
+PROC
+PROC_ApplyDiversionHiddenFrom((GUIDSTRING)_Character, (GUIDSTRING)_Cause)
+AND
+HasActiveStatus(_Cause, "DIVERSION_ACTIVE", 0)
+THEN
+ApplyStatus(_Cause, "DIVERSION_ACTIVE", 6.0, 1, _Cause);
+ApplyStatus(_Character, "HIDDEN_FROM", -1.0, 0, _Cause);
+DB_DiversionHidden(_Character, _Cause);
+
+PROC
+PROC_ApplyDiversionHiddenFrom((GUIDSTRING)_Character, (GUIDSTRING)_Cause)
+AND
+HasActiveStatus(_Cause, "DIVERSION_ACTIVE", 1)
+THEN
+ApplyStatus(_Character, "HIDDEN_FROM", -1.0, 0, _Cause);
+DB_DiversionHidden(_Character, _Cause);
 
 PROC
 PROC_TurnToDiversion((GUIDSTRING)_Character)
@@ -738,6 +768,25 @@ AND
 DB_DiversionLocation((GUIDSTRING)_Helper)
 THEN
 SteerTo((CHARACTER)_Character, _Helper, 0);
+
+// Do not apply HIDDEN for Create a Diversion. Off-guard comes from
+// HIDDEN_FROM on the observer; HIDDEN on the diverter immediately
+// retriggers Saw/HIDE_RECHECK and SneakingRules, which strip it.
+// Clean up only the HIDDEN_FROM instances this diversion applied.
+IF
+AttackedBy(_, _, (GUIDSTRING)_Cause, _, _, _, _)
+AND
+HasActiveStatus(_Cause, "DIVERSION_ACTIVE", 1)
+THEN
+RemoveStatus(_Cause, "DIVERSION_ACTIVE");
+
+IF
+StatusRemoved((GUIDSTRING)_Cause, "DIVERSION_ACTIVE", _, _)
+AND
+DB_DiversionHidden((GUIDSTRING)_Character, _Cause)
+THEN
+ApplyStatus(_Cause, "HIDDEN_FROM_REMOVE", 0.0, 0, _Character);
+NOT DB_DiversionHidden(_Character, _Cause);
 //END_REGION
 EXITSECTION
 
