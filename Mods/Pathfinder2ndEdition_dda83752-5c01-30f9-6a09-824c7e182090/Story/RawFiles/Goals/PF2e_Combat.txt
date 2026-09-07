@@ -652,8 +652,10 @@ GetInnerDistanceTo(_Ally, _Source, (REAL)_AS)
 AND
 RealSum(_ST, _TA, (REAL)_STA)
 AND
-// This constant value can be tuned to control flanking angle.
-RealProduct(_AS, 1.015, (REAL)_Threshold)
+// This constant can be tuned to control flanking angle.
+// Flank when ST+TA < AS * k. For equal melee range, that is angle-at-target
+// greater than 2*asin(1/k): 1.015 ≈ ±10° from opposite, 1.05 ≈ ±18°.
+RealProduct(_AS, 1.05, (REAL)_Threshold)
 AND
 _STA < _Threshold
 THEN
