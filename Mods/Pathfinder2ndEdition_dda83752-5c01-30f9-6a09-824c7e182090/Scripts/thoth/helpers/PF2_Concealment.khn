@@ -9,6 +9,14 @@ function SpellIgnoresHidden()
 	return SpellId('Target_PointOut_NPC')
 end
 
+-- Weapon/unarmed Strikes. Spell attacks are excluded so they observe
+-- you before the action, matching Create a Diversion / Hidden.
+function IsStrikeAction()
+	local weapon = HasStringInSpellRoll('MeleeWeaponAttack') | HasStringInSpellRoll('RangedWeaponAttack') | HasStringInSpellRoll('MeleeOffHandWeaponAttack') | HasStringInSpellRoll('RangedOffHandWeaponAttack') | HasStringInSpellRoll('MeleeUnarmedAttack') | HasStringInSpellRoll('RangedUnarmedAttack') | IsWeaponAttack() | IsUnarmedAttack() | IsRangedUnarmedAttack() | SpellId('Throw_Throw') | SpellId('Throw_ImprovisedWeapon')
+	local spellAttack = HasStringInSpellRoll('SpellAttack')
+	return weapon & ~spellAttack
+end
+
 function HideCheckStatusDuration(entity)
 	return math.ceil(GetStatusDuration("HIDE_CHECK_RESULT", entity))
 end

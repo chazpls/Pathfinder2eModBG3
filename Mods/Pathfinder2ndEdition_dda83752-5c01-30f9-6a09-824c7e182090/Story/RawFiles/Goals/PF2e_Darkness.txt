@@ -299,6 +299,8 @@ NOT DB_CheckConditionsForHideResult(_Character, _Cause);
 PROC
 PROC_CritFailRemoveHidden((GUIDSTRING)_Character, (GUIDSTRING)_Cause, (INTEGER)_TotalRoll, (INTEGER)_PassivePerception, (INTEGER)_Roll)
 AND
+HasActiveStatus(_Cause, "DIVERSION_ACTIVE", 0)
+AND
 HasLineOfSight(_Character, _Cause, 1)
 AND
 IntegerMin(_Roll, 2, (INTEGER)_RollOneOrTwo)
@@ -319,6 +321,8 @@ ApplyStatus(_Cause, "UNDETECTED_FROM_REMOVE", 0.0, 0, _Character);
 // Critical failure with cover buff
 PROC
 PROC_CritFailRemoveHidden((GUIDSTRING)_Character, (GUIDSTRING)_Cause, (INTEGER)_TotalRoll, (INTEGER)_PassivePerception, (INTEGER)_Roll)
+AND
+HasActiveStatus(_Cause, "DIVERSION_ACTIVE", 0)
 AND
 HasLineOfSight(_Character, _Cause, 0)
 AND
@@ -649,6 +653,7 @@ AND
 TimerExists("DiversionCheckTimer", 0)
 THEN
 TimerLaunch("DiversionCheckTimer", 30);
+DB_DiversionCaster(_Cause);
 
 // Create a distraction spawns an invisible helper that
 // allows us to make humanoid enemies turn towards it. 
@@ -658,7 +663,9 @@ THEN
 DB_DiversionLocation(_Helper);
 
 // Create a Diversion always checks against every enemy, and does
-// not care about line of sight.
+// not care about line of sight. The distraction helper is only used
+// to turn enemies; Off-Guard/Hidden must still apply if it fails
+// to spawn.
 IF
 TimerFinished("DiversionCheckTimer")
 AND
@@ -671,34 +678,46 @@ AND
 GetStatusTurns(_Cause, "DIVERSION_CHECK_RESULT", (INTEGER)_Roll)
 AND
 IntegerSum(_Roll, _ModifierSkill, (INTEGER)_TotalRoll)
-AND
-DB_DiversionLocation((GUIDSTRING)_Helper)
 THEN
 PROC_ApplyHiddenDiversion(_Character, _Cause, _TotalRoll, _Roll);
+NOT DB_HideCheckSchedule(_Character, _Cause);
 
-// Cleanup and apply the stale status to debuff future attempts.
 IF
 TimerFinished("DiversionCheckTimer")
 AND
-DB_HideCheckSchedule((GUIDSTRING)_Character, (GUIDSTRING)_Cause)
-AND
 DB_DiversionLocation((GUIDSTRING)_Helper)
 THEN
-NOT DB_HideCheckSchedule(_Character, _Cause);
-ApplyStatus(_Cause, "DIVERSION_STALE", 60.0, 1, _Character);
 NOT DB_DiversionLocation(_Helper);
+
+// Stale is a penalty on later attempts. Apply it after every
+// enemy on this attempt has been checked, so the +4 DC cannot
+// apply to this same diversion.
+IF
+TimerFinished("DiversionCheckTimer")
+AND
+DB_DiversionCaster((GUIDSTRING)_Cause)
+THEN
+TimerLaunch("DiversionStaleTimer", 50);
+
+IF
+TimerFinished("DiversionStaleTimer")
+AND
+DB_DiversionCaster((GUIDSTRING)_Cause)
+THEN
+ApplyStatus(_Cause, "DIVERSION_STALE", 60.0, 1, _Cause);
+NOT DB_DiversionCaster(_Cause);
 
 // A check of the roll against perception DC.
 PROC
 PROC_ApplyHiddenDiversion((GUIDSTRING)_Character, (GUIDSTRING)_Cause, (INTEGER)_Roll, (INTEGER)_Raw)
 AND
-HasActiveStatus(_Character, "DIVERSION_STALE", 0)
+HasActiveStatus(_Cause, "DIVERSION_STALE", 0)
 AND
 CalculatePassiveSkill(_Character, "Perception", (INTEGER)_PassivePerception)
 AND
 _Roll >= _PassivePerception
 THEN
-ApplyStatus(_Character, "HIDDEN_FROM", -1.0, 0, _Cause);
+PROC_ApplyDiversionHiddenFrom(_Character, _Cause);
 PROC_TurnToDiversion(_Character);
 
 // Crits always succeed
@@ -707,7 +726,7 @@ PROC_ApplyHiddenDiversion((GUIDSTRING)_Character, (GUIDSTRING)_Cause, (INTEGER)_
 AND
 _Raw == 20
 THEN
-ApplyStatus(_Character, "HIDDEN_FROM", -1.0, 0, _Cause);
+PROC_ApplyDiversionHiddenFrom(_Character, _Cause);
 PROC_TurnToDiversion(_Character);
 
 // Characters that have recently used Create a Diversion are
@@ -725,8 +744,28 @@ IntegerSum(_PassivePerception, 4, (INTEGER)_PerceptionDC)
 AND
 _Roll >= _PerceptionDC
 THEN
-ApplyStatus(_Character, "HIDDEN_FROM", -1.0, 0, _Cause);
+PROC_ApplyDiversionHiddenFrom(_Character, _Cause);
 PROC_TurnToDiversion(_Character);
+
+// Apply DIVERSION_ACTIVE only once so Overwrite does not fire
+// StatusRemoved and strip HIDDEN_FROM from earlier enemies.
+PROC
+PROC_ApplyDiversionHiddenFrom((GUIDSTRING)_Character, (GUIDSTRING)_Cause)
+AND
+HasActiveStatus(_Cause, "DIVERSION_ACTIVE", 0)
+THEN
+ApplyStatus(_Cause, "DIVERSION_ACTIVE", 6.0, 1, _Cause);
+ApplyStatus(_Cause, "HIDDEN", -1.0, 0, _Cause);
+ApplyStatus(_Character, "HIDDEN_FROM", -1.0, 0, _Cause);
+DB_DiversionHidden(_Character, _Cause);
+
+PROC
+PROC_ApplyDiversionHiddenFrom((GUIDSTRING)_Character, (GUIDSTRING)_Cause)
+AND
+HasActiveStatus(_Cause, "DIVERSION_ACTIVE", 1)
+THEN
+ApplyStatus(_Character, "HIDDEN_FROM", -1.0, 0, _Cause);
+DB_DiversionHidden(_Character, _Cause);
 
 PROC
 PROC_TurnToDiversion((GUIDSTRING)_Character)
@@ -734,6 +773,216 @@ AND
 DB_DiversionLocation((GUIDSTRING)_Helper)
 THEN
 SteerTo((CHARACTER)_Character, _Helper, 0);
+
+// Strikes observe you after the attack. Spell attacks and other
+// non-Stealth actions still break Hidden on OnSpellCast.
+IF
+AttackedBy(_, _, (GUIDSTRING)_Cause, _, _, _, _)
+AND
+HasActiveStatus(_Cause, "HIDDEN", 1)
+AND
+IsPlayer((CHARACTER)_Cause, 1)
+THEN
+PROC_BreakHiddenAfterStrike(_Cause);
+
+IF
+MissedBy(_, _, (CHARACTER)_Cause, _)
+AND
+HasActiveStatus((GUIDSTRING)_Cause, "HIDDEN", 1)
+AND
+IsPlayer(_Cause, 1)
+THEN
+PROC_BreakHiddenAfterStrike(_Cause);
+
+PROC
+PROC_BreakHiddenAfterStrike((GUIDSTRING)_Cause)
+AND
+HasActiveStatus(_Cause, "DIVERSION_ACTIVE", 1)
+THEN
+DB_DiversionNoSettle(_Cause);
+ApplyStatus(_Cause, "DIVERSION_NO_SETTLE", 6.0, 1, _Cause);
+RemoveStatus(_Cause, "HIDDEN");
+RemoveStatus(_Cause, "UNDETECTED");
+RemoveStatus(_Cause, "DIVERSION_ACTIVE");
+
+PROC
+PROC_BreakHiddenAfterStrike((GUIDSTRING)_Cause)
+AND
+HasActiveStatus(_Cause, "DIVERSION_ACTIVE", 0)
+THEN
+RemoveStatus(_Cause, "HIDDEN");
+RemoveStatus(_Cause, "UNDETECTED");
+
+// Strike/Unhide: do not convert diversion Hidden into a real Hide.
+IF
+StatusRemoved((GUIDSTRING)_Cause, "DIVERSION_ACTIVE", _, _)
+AND
+DB_DiversionNoSettle(_Cause)
+AND
+DB_DiversionHidden((GUIDSTRING)_Character, _Cause)
+THEN
+NOT DB_DiversionHidden(_Character, _Cause);
+
+IF
+StatusRemoved((GUIDSTRING)_Cause, "DIVERSION_ACTIVE", _, _)
+AND
+HasActiveStatus(_Cause, "DIVERSION_NO_SETTLE", 1)
+AND
+DB_DiversionHidden((GUIDSTRING)_Character, _Cause)
+THEN
+NOT DB_DiversionHidden(_Character, _Cause);
+
+IF
+StatusRemoved((GUIDSTRING)_Cause, "DIVERSION_ACTIVE", _, _)
+AND
+DB_DiversionNoSettle(_Cause)
+THEN
+RemoveStatus(_Cause, "DIVERSION_NO_SETTLE");
+NOT DB_DiversionNoSettle(_Cause);
+
+IF
+StatusRemoved((GUIDSTRING)_Cause, "DIVERSION_ACTIVE", _, _)
+AND
+HasActiveStatus(_Cause, "DIVERSION_NO_SETTLE", 1)
+THEN
+RemoveStatus(_Cause, "DIVERSION_NO_SETTLE");
+
+// End of turn or Stay Hidden: keep Hidden only where cover/concealment now exists.
+IF
+StatusRemoved((GUIDSTRING)_Cause, "DIVERSION_ACTIVE", _, _)
+AND
+NOT DB_DiversionNoSettle(_Cause)
+AND
+HasActiveStatus(_Cause, "DIVERSION_NO_SETTLE", 0)
+THEN
+ApplyStatus(_Cause, "DIVERSION_SETTLE", -1.0, 0, _Cause);
+
+IF
+StatusApplied((GUIDSTRING)_Cause, "DIVERSION_SETTLE", _, _)
+THEN
+DB_DiversionSettling(_Cause);
+
+IF
+StatusApplied((GUIDSTRING)_Cause, "DIVERSION_SETTLE", _, _)
+AND
+TimerExists("DiversionSettleTimer", 0)
+THEN
+TimerLaunch("DiversionSettleTimer", 30);
+
+IF
+TimerFinished("DiversionSettleTimer")
+AND
+DB_DiversionSettling((GUIDSTRING)_Cause)
+AND
+DB_DiversionHidden((GUIDSTRING)_Character, _Cause)
+THEN
+NOT DB_HasHideConditions(_Character, _Cause);
+PROC_HasHideConditions(_Character, _Cause);
+PROC_DiversionSettleObserver(_Character, _Cause);
+
+IF
+TimerFinished("DiversionSettleTimer")
+AND
+DB_DiversionSettling((GUIDSTRING)_Cause)
+THEN
+TimerLaunch("DiversionSettleFinishTimer", 10);
+
+IF
+TimerFinished("DiversionSettleFinishTimer")
+AND
+DB_DiversionSettling((GUIDSTRING)_Cause)
+THEN
+PROC_DiversionKeepHidden(_Cause);
+PROC_DiversionDropHidden(_Cause);
+RemoveStatus(_Cause, "DIVERSION_SETTLE");
+NOT DB_DiversionSettling(_Cause);
+
+PROC
+PROC_DiversionKeepHidden((GUIDSTRING)_Cause)
+AND
+DB_DiversionStayed((GUIDSTRING)_Character, _Cause)
+THEN
+DB_DiversionDidStay(_Cause);
+NOT DB_DiversionStayed(_Character, _Cause);
+
+PROC
+PROC_DiversionDropHidden((GUIDSTRING)_Cause)
+AND
+NOT DB_DiversionDidStay(_Cause)
+THEN
+RemoveStatus(_Cause, "HIDDEN");
+RemoveStatus(_Cause, "UNDETECTED");
+
+PROC
+PROC_DiversionDropHidden((GUIDSTRING)_Cause)
+AND
+DB_DiversionDidStay(_Cause)
+THEN
+NOT DB_DiversionDidStay(_Cause);
+
+PROC
+PROC_HasHideConditions((GUIDSTRING)_Character, (GUIDSTRING)_Cause)
+AND
+HasLineOfSight(_Character, _Cause, 0)
+THEN
+DB_HasHideConditions(_Character, _Cause);
+
+PROC
+PROC_HasHideConditions((GUIDSTRING)_Character, (GUIDSTRING)_Cause)
+AND
+DB_HideCheckConcealed(_Character, _Cause)
+THEN
+DB_HasHideConditions(_Character, _Cause);
+
+PROC
+PROC_HasHideConditions((GUIDSTRING)_Character, (GUIDSTRING)_Cause)
+AND
+IsTagged(_Cause, (TAG)DARKNESS_badb91be-7a47-4898-beed-d0e3a7083783, 1)
+AND
+HasPassive(_Character, "SuperiorDarkvision", 0)
+AND
+HasPassive(_Character, "Darkvision", 0)
+AND
+IsTagged(_Character, (TAG)BLINDSIGHT_a49c94ac-6903-408e-8b05-86371fd865c0, 0)
+THEN
+DB_HasHideConditions(_Character, _Cause);
+
+PROC
+PROC_HasHideConditions((GUIDSTRING)_Character, (GUIDSTRING)_Cause)
+AND
+HasActiveStatusWithGroup(_Character, "SG_Blinded", 1)
+AND
+IsTagged(_Character, (TAG)BLINDSIGHT_a49c94ac-6903-408e-8b05-86371fd865c0, 0)
+THEN
+DB_HasHideConditions(_Character, _Cause);
+
+PROC
+PROC_HasHideConditions((GUIDSTRING)_Character, (GUIDSTRING)_Cause)
+AND
+HasActiveStatusWithGroup(_Cause, "SG_Invisible", 1)
+AND
+HasActiveStatus(_Character, "SEE_INVISIBILITY", 0)
+THEN
+DB_HasHideConditions(_Character, _Cause);
+
+PROC
+PROC_DiversionSettleObserver((GUIDSTRING)_Character, (GUIDSTRING)_Cause)
+AND
+DB_HasHideConditions(_Character, _Cause)
+THEN
+DB_DiversionStayed(_Character, _Cause);
+NOT DB_DiversionHidden(_Character, _Cause);
+NOT DB_HasHideConditions(_Character, _Cause);
+NOT DB_HideCheckConcealed(_Character, _Cause);
+
+PROC
+PROC_DiversionSettleObserver((GUIDSTRING)_Character, (GUIDSTRING)_Cause)
+AND
+NOT DB_HasHideConditions(_Character, _Cause)
+THEN
+ApplyStatus(_Cause, "HIDDEN_FROM_REMOVE", 0.0, 0, _Character);
+NOT DB_DiversionHidden(_Character, _Cause);
+NOT DB_HideCheckConcealed(_Character, _Cause);
 //END_REGION
 EXITSECTION
 

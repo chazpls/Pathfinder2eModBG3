@@ -227,7 +227,7 @@
         <field name="UUID" type="IdTableFieldDefinition" value="b7b3aae6-1d3e-477c-ac7f-2ed67391c9e9" />
         <field name="Name" type="NameTableFieldDefinition" value="Unhide" />
         <field name="AIFlags" type="EnumerationListTableFieldDefinition" value="CanNotUse" enumeration_type_name="AIFlags" version="1" />
-        <field name="SpellProperties" type="StringTableFieldDefinition" value="RemoveStatus(SELF, HIDDEN);RemoveStatus(SELF, UNDETECTED);" />
+        <field name="SpellProperties" type="StringTableFieldDefinition" value="RemoveStatus(SELF, HIDDEN);RemoveStatus(SELF, UNDETECTED);ApplyStatus(SELF,DIVERSION_NO_SETTLE,100,1);RemoveStatus(SELF, DIVERSION_ACTIVE);" />
         <field name="TargetConditions" type="StringTableFieldDefinition" value="Self();" />
         <field name="Icon" type="StringTableFieldDefinition" value="Action_Hide_Regular" />
         <field name="DisplayName" type="TranslatedStringTableFieldDefinition" handle="h5099b774g415bgab35g2f14g233a916010c8" version="1" />
@@ -239,6 +239,30 @@
         <field name="VerbalIntent" type="EnumerationTableFieldDefinition" value="Buff" enumeration_type_name="VerbalIntent" version="1" />
         <field name="SpellFlags" type="EnumerationListTableFieldDefinition" value="Invisible;Temporary;Stealth;ImmediateCast" enumeration_type_name="SpellFlagList" version="1" />
         <field name="SpellActionType" type="EnumerationTableFieldDefinition" value="Hide" enumeration_type_name="SpellActionType" version="1" />
+        <field name="CinematicArenaFlags" type="EnumerationTableFieldDefinition" value="Ignore" enumeration_type_name="CinematicArenaFlags" version="1" />
+        <field name="Sheathing" type="EnumerationTableFieldDefinition" value="DontChange" enumeration_type_name="SpellSheathing" version="1" />
+      </fields>
+    </stat_object>
+    <stat_object is_substat="false">
+      <fields>
+        <field name="UUID" type="IdTableFieldDefinition" value="e5f0a13c-4d6b-4c8e-af20-3b4c5d6e7f80" />
+        <field name="Name" type="NameTableFieldDefinition" value="DiversionSettle" />
+        <field name="AIFlags" type="EnumerationListTableFieldDefinition" value="CanNotUse" enumeration_type_name="AIFlags" version="1" />
+        <field name="SpellProperties" type="StringTableFieldDefinition" value="RemoveStatus(SELF,DIVERSION_ACTIVE);" />
+        <field name="TargetConditions" type="StringTableFieldDefinition" value="Self();" />
+        <field name="Autocast" type="EnumerationTableFieldDefinition" value="Yes" enumeration_type_name="YesNo" version="1" />
+        <field name="Icon" type="StringTableFieldDefinition" value="Action_Hide_Regular" />
+        <field name="DisplayName" type="TranslatedStringTableFieldDefinition" handle="h8c4e91a2g7b3dg4f1ag9e2cg5d6a8b0c1e2f" version="1" />
+        <field name="Description" type="TranslatedStringTableFieldDefinition" handle="h8c4e91a2g7b3dg4f1ag9e2cg5d6a8b0c1e30" version="1" />
+        <field name="CastTextEvent" type="StringTableFieldDefinition" value="Cast" />
+        <field name="UseCosts" type="StringTableFieldDefinition" value="ActionPoint:0" />
+        <field name="SpellAnimation" type="CastAnimationsTableFieldDefinition" value=",,;,,;,,;,,;,,;,,;,,;,,;,," />
+        <field name="VerbalIntent" type="EnumerationTableFieldDefinition" value="Buff" enumeration_type_name="VerbalIntent" version="1" />
+        <field name="SpellFlags" type="EnumerationListTableFieldDefinition" value="Stealth;ImmediateCast;Invisible;NoCameraMove;UnavailableInDialogs" enumeration_type_name="SpellFlagList" version="1" />
+        <field name="SpellActionType" type="EnumerationTableFieldDefinition" value="Hide" enumeration_type_name="SpellActionType" version="1" />
+        <field name="HitAnimationType" type="EnumerationTableFieldDefinition" value="None" enumeration_type_name="HitAnimationType" version="1" />
+        <field name="RequirementConditions" type="StringTableFieldDefinition" value="HasStatus('DIVERSION_ACTIVE');" />
+        <field name="RequirementEvents" type="EnumerationListTableFieldDefinition" value="OnStatusApplied;OnStatusRemoved" enumeration_type_name="StatusEvent" version="1" />
         <field name="CinematicArenaFlags" type="EnumerationTableFieldDefinition" value="Ignore" enumeration_type_name="CinematicArenaFlags" version="1" />
         <field name="Sheathing" type="EnumerationTableFieldDefinition" value="DontChange" enumeration_type_name="SpellSheathing" version="1" />
       </fields>
@@ -6837,7 +6861,7 @@
         <field name="CastSound" type="StringTableFieldDefinition" value="Spell_Cast_Utility_Identify_L1to3" />
         <field name="TargetSound" type="StringTableFieldDefinition" value="Spell_Impact_Utility_Identify_L1to3" />
         <field name="SpellAnimation" type="CastAnimationsTableFieldDefinition" value="d92e116d-a53c-4d4e-bf7d-64327e0d5c30,,;,,;2b0ad493-7233-45cf-8aea-13efa9e13298,,;faf90c24-8a7d-44af-9506-dc6b501905e1,,;c4c69e42-44de-4c46-913d-4c503a928922,,;,,;e6ad153c-3f67-4e86-a083-16ee516f88e9,,;,,;,," />
-        <field name="SpellFlags" type="EnumerationListTableFieldDefinition" value="None" enumeration_type_name="SpellFlagList" version="1" />
+        <field name="SpellFlags" type="EnumerationListTableFieldDefinition" value="Stealth" enumeration_type_name="SpellFlagList" version="1" />
         <field name="PrepareEffect" type="GuidObjectTableFieldDefinition" value="62fa9d2f-ec0b-4900-a455-ec9b5e6e3eb4" />
         <field name="CastEffect" type="GuidObjectTableFieldDefinition" value="ae89577b-9458-4ca0-9d37-07d1f381c830" />
         <field name="TargetEffect" type="GuidObjectTableFieldDefinition" clear_inherited_value="true" value="" />

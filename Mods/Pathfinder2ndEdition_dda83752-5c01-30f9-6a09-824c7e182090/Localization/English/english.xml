@@ -31128,8 +31128,12 @@ Really? Just like that? All right, but if she reaches for that lute, it's firewo
   <content contentuid="h624fe14eg1099ge200g452fgcb5e1e001c3b" version="1">Distract your enemies by succeeding a &lt;LSTag Tooltip="Deception"&gt;Deception check&lt;/LSTag&gt;. Attacking or casting a spell will reveal your location.</content>
   <content contentuid="h3709a9c7g7a1eg5c70g5d4fgb8448cd193d9" version="1">Cannot be used while hiding.</content>
   <content contentuid="h3a498b60ge7aegd0c9g405dg24d5d6d6d677" version="1">Create a Diversion</content>
-  <content contentuid="ha95bb7a3ge72ag5793gebfdg2d7f3ee95f97" version="1">Distract your enemies by succeeding a &lt;LSTag Tooltip="Deception"&gt;Deception check&lt;/LSTag&gt;. Attacking or casting a spell will reveal your location.</content>
+  <content contentuid="ha95bb7a3ge72ag5793gebfdg2d7f3ee95f97" version="2">Distract your enemies by succeeding a &lt;LSTag Tooltip="Deception"&gt;Deception check&lt;/LSTag&gt;. You become hidden until the end of your turn. A Strike keeps them off-guard for that attack, then reveals you. Other actions reveal you as you begin them, unless they are Hide, Sneak, Seek, Battle Medicine, Analyze Weakness, or Devise a Stratagem.</content>
   <content contentuid="hca1bf353g5231gb00dg08efg13eff44ba12c" version="1">Distraction</content>
+  <content contentuid="h8c4e91a2g7b3dg4f1ag9e2cg5d6a8b0c1e2f" version="1">Stay Hidden</content>
+  <content contentuid="h8c4e91a2g7b3dg4f1ag9e2cg5d6a8b0c1e30" version="1">If you now have cover or concealment, you remain hidden. Otherwise you become observed. Uses your Create a Diversion check; this does not roll Stealth again.</content>
+  <content contentuid="h8c4e91a2g7b3dg4f1ag9e2cg5d6a8b0c1e31" version="1">Stay Hidden Check</content>
+  <content contentuid="h8c4e91a2g7b3dg4f1ag9e2cg5d6a8b0c1e32" version="1">Diversion No Settle</content>
   <content contentuid="hac8c3caeg2d37g08b6g2d61g4b3d23ed17e7" version="1">Not Concealed</content>
   <content contentuid="hc071f141g3582g464fg36b5ge15ed3c927c3" version="1">Hiding is only possible against enemies that can't see you, such as when behind cover or concealed. You are not currently concealed from all enemies, so some may be impossible to hide from.</content>
   <content contentuid="h5d7d2d3fgc773gee33g2411g355c5979a778" version="1">Not Concealed</content>
