@@ -6926,7 +6926,7 @@ Because this is Pathfinder 2nd Edition, Short Rests are unlimited and restore fo
   <content contentuid="h1ca878efgb802g48efgbc5age4f3a7afd806" version="1">Silence</content>
   <content contentuid="h84a0cdf0gd6acg34fbg94f2g18be7fc0c049" version="1">Create a sound-proof sphere. All within are &lt;LSTag Type="Status" Tooltip="SILENCED"&gt;Silenced&lt;/LSTag&gt; and &lt;LSTag Tooltip="Immune"&gt;Immune&lt;/LSTag&gt; to Thunder damage.</content>
   <content contentuid="hbe426f7cge67fge3a0g8891g85c74e0d00ff" version="1">Revealing Light</content>
-  <content contentuid="heb851c67gb312gb8e2g3b14gdfd956ae2cc5" version="1">Shedding dim light. Cannot be Invisible.</content>
+  <content contentuid="heb851c67gb312gb8e2g3b14gdfd956ae2cc5" version="2">Shedding dim light. &lt;LSTag Type="Status" Tooltip="DAZZLED_APPLY"&gt;Dazzled&lt;/LSTag&gt;. Cannot be Invisible.</content>
   <content contentuid="h9d7e841fg79bage0f7g25dag1a883a915c7d" version="1">Silence Aura</content>
   <content contentuid="h482a025cge429g2919gddf2g105ca467cfc3" version="1">While it remains in the aura, affected entity is &lt;LSTag Type="Status" Tooltip="SILENCED"&gt;Silenced&lt;/LSTag&gt;.</content>
   <content contentuid="h71f7e78bgb18ag7a0dgfc8bgf1c6c4bafef7" version="1">Slam Down </content>

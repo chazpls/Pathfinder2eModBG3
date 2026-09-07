@@ -17169,7 +17169,7 @@
         <field name="UUID" type="IdTableFieldDefinition" value="cbdd8645-71f7-4b2b-9a2e-82f9e19642bd" />
         <field name="Name" type="NameTableFieldDefinition" value="FAERIE_FIRE" />
         <field name="DisplayName" type="TranslatedStringTableFieldDefinition" handle="hbe426f7cge67fge3a0g8891g85c74e0d00ff" version="1" />
-        <field name="Description" type="TranslatedStringTableFieldDefinition" handle="heb851c67gb312gb8e2g3b14gdfd956ae2cc5" version="1" />
+        <field name="Description" type="TranslatedStringTableFieldDefinition" handle="heb851c67gb312gb8e2g3b14gdfd956ae2cc5" version="2" />
         <field name="Icon" type="StringTableFieldDefinition" value="Spell_Evocation_FaerieFire" />
         <field name="StackId" type="StringTableFieldDefinition" value="FAERIE_FIRE" />
         <field name="StackPriority" type="IntegerTableFieldDefinition" value="1" />
