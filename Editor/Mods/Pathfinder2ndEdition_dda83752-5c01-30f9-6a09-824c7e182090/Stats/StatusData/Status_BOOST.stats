@@ -4623,6 +4623,25 @@
     </stat_object>
     <stat_object is_substat="false">
       <fields>
+        <field name="UUID" type="IdTableFieldDefinition" value="a1e4bfb2-4ef5-45ff-8aec-2c74ecb43812" />
+        <field name="Name" type="NameTableFieldDefinition" value="REPOSITION_TARGET" />
+        <field name="DisplayName" type="TranslatedStringTableFieldDefinition" handle="hfa2a9dcfgc4a0g71f0gab53g96a42a37af26" version="1" />
+        <field name="Icon" type="StringTableFieldDefinition" value="Action_Monster_Gortash_ReelIn" />
+        <field name="IsUnique" type="BoolTableFieldDefinition" value="True" />
+      </fields>
+    </stat_object>
+    <stat_object is_substat="false">
+      <fields>
+        <field name="UUID" type="IdTableFieldDefinition" value="21e5f29b-a200-430f-a9f6-ea309657a174" />
+        <field name="Name" type="NameTableFieldDefinition" value="REPOSITION_UNLOCK" />
+        <field name="Boosts" type="StringTableFieldDefinition" value="UnlockSpell(Teleportation_Reposition_Place);" />
+        <field name="StatusPropertyFlags" type="EnumerationListTableFieldDefinition" value="DisableOverhead;DisableCombatlog;DisablePortraitIndicator" enumeration_type_name="StatusPropertyFlags" version="1" />
+        <field name="StatusEffect" type="GuidObjectTableFieldDefinition" value="04e49f47-cceb-4026-a2b2-a14c03f321ef" />
+        <field name="DisplayName" type="TranslatedStringTableFieldDefinition" handle="h8867b573g0f02g4a6cg940cg8ebc6296e41d" version="1" />
+      </fields>
+    </stat_object>
+    <stat_object is_substat="false">
+      <fields>
         <field name="UUID" type="IdTableFieldDefinition" value="dd3bd1cd-d389-4698-8d79-174e069a89ae" />
         <field name="Name" type="NameTableFieldDefinition" value="THROW_SUCCESS" />
         <field name="Using" type="BaseClassTableFieldDefinition" value="b4be081d-5c34-4680-a020-700e08cb9bc8" />

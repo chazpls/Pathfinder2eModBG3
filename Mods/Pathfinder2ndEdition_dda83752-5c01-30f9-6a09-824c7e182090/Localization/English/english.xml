@@ -3436,6 +3436,10 @@ Because this is Pathfinder 2nd Edition, Short Rests are unlimited and restore fo
   <content contentuid="h630b5e09ge518g62eag8bb8g246bed2e31c7" version="1">Adjacent Target</content>
   <content contentuid="hfa2a9dcfgc4a0g71f0gab53g96a42a37af26" version="1">Reposition Target</content>
   <content contentuid="hcab07827gd604g7ba3g7478g283420808895" version="1">Move the target anywhere within [1].</content>
+  <content contentuid="h8867b573g0f02g4a6cg940cg8ebc6296e41d" version="1">Reposition</content>
+  <content contentuid="hd9758d1bgc4bfg4603g9060ga215a1693378" version="1">Requires a free hand. Attempt an Athletics check to force a creature no more than one size larger than you to move. On a success, you can then use &lt;LSTag Type="Spell" Tooltip="Teleportation_Reposition_Place"&gt;Reposition: Place&lt;/LSTag&gt; to move it to a space within your reach.</content>
+  <content contentuid="h63da7890g29ebg44d7ga203g916b9f14114d" version="1">Reposition: Place</content>
+  <content contentuid="hccd7f82fg56f2g4098g85e4g46a6ef0e0ecf" version="1">Move the creature you repositioned to a space within [1] of you.</content>
   <content contentuid="h96681fb7g9e07g7f79ge459g1de9ab369636" version="1">Critical Specialization</content>
   <content contentuid="h3bd55effgb475g8cf8g7c11gdbda146a47ce" version="1">You gain access to the critical specialization effects of all weapons.</content>
   <content contentuid="hb0666af1g1fa3gca69g45a9g490c944e6e32" version="1">Critical Specialization: Brawling</content>
